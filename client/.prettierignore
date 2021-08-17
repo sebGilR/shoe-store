@@ -1,0 +1,5 @@
+node_modules
+dist
+public
+package.json
+.eslintrc.js
