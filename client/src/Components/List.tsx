@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import SectionBase, { Title } from "./Utils";
 
 const ListContainer = styled(SectionBase)``;
@@ -9,8 +9,12 @@ const Row = styled.div`
   border-bottom: 1px solid #dfdfdf34;
 `;
 
+type StockType = {
+  [store: string]: { [model: string]: number };
+};
+
 type ListProps = {
-  items: any;
+  items: StockType | undefined;
 };
 
 const SubList = styled.div`
@@ -21,9 +25,35 @@ const SubList = styled.div`
   margin-bottom: 30px;
 `;
 
-const Cell = styled.div`
+type CellProps = {
+  pill?: string;
+};
+
+const Cell = styled.div<CellProps>`
   padding: 10px 20px;
   width: 33.33%;
+  ${({ pill }) => {
+    if (pill === "Out of stock") {
+      return css`
+        background-color: #d04b4b;
+        color: white;
+      `;
+    }
+    if (pill === "Very low") {
+      return css`
+        background-color: #dfa151;
+        color: black;
+      `;
+    }
+    if (pill === "Low") {
+      return css`
+        background-color: #d3c8b9;
+        color: black;
+      `;
+    }
+
+    return null;
+  }};
 `;
 
 const TitleCell = styled(Cell)`
@@ -33,7 +63,7 @@ const TitleCell = styled(Cell)`
 const columns = ["MODEL", "INVENTORY", "STOCK LEVEL"];
 
 const List = ({ items }: ListProps): JSX.Element => {
-  const sortKeys = (keys: string[]) => keys && Object.keys(keys).sort();
+  const sortKeys = (keys: any) => keys && Object.keys(keys).sort();
 
   const computeStockLevel = (inventory: number) => {
     if (inventory === 0) return "Out of stock";
@@ -49,7 +79,7 @@ const List = ({ items }: ListProps): JSX.Element => {
   return (
     <ListContainer>
       {items &&
-        storeKeys.map((title) => {
+        storeKeys.map((title: string) => {
           const modelKeys = sortKeys(items[title]);
           return (
             <SubList key={title}>
@@ -60,13 +90,13 @@ const List = ({ items }: ListProps): JSX.Element => {
                     <TitleCell key={column}>{column}</TitleCell>
                   ))}
                 </Row>
-                {modelKeys.map((model) => {
+                {modelKeys.map((model: string) => {
                   const stockLevel = computeStockLevel(items[title][model]);
                   return (
                     <Row key={`${title}-${model}`}>
                       <Cell>{model}</Cell>
                       <Cell>{items[title][model]}</Cell>
-                      <Cell>{stockLevel}</Cell>
+                      <Cell pill={stockLevel}>{stockLevel}</Cell>
                     </Row>
                   );
                 })}

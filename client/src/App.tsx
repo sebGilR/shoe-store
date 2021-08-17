@@ -46,7 +46,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const WS = new WebSocket("ws://localhost:8080/");
 
-    WS.onmessage = function (event) {
+    WS.onmessage = (event) => {
       const entry = JSON.parse(event.data);
       setStock((prevState) => updateStock(entry, prevState));
     };
