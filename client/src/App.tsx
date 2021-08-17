@@ -5,7 +5,6 @@ import Nav from "./Components/Nav";
 
 const Main = styled.main`
   position: absolute;
-  min-height: 100vh;
   top: 80px;
   left: 0;
   right: 0;
