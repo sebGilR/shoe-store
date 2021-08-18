@@ -14,5 +14,6 @@ module.exports = {
   },
   rules: {
     "dot-notation": 0,
+    "react/jsx-props-no-spreading": "off",
   }
 };
