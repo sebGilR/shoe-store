@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 import List from "./Components/List";
 import Nav from "./Components/Nav";
+import Stats from "./Components/Stats";
 
 const Main = styled.main`
   position: absolute;
-  top: 80px;
+  top: 50px;
   left: 0;
   right: 0;
   color: white;
@@ -15,10 +17,11 @@ const Main = styled.main`
 
 const Double = styled.div`
   display: flex;
-  justify-content: stretch;
+  justify-content: center;
+  padding: 0 10%;
 
   & > div {
-    padding: 0 30px;
+    padding: 0 10px;
   }
 `;
 
@@ -34,71 +37,91 @@ type StockType =
     }
   | undefined;
 
+const updateStock = (
+  { store, model, inventory }: StockEntryType,
+  currentStock: StockType
+): StockType => {
+  const newStock = { ...currentStock };
+
+  if (newStock?.[store]) {
+    newStock[store][model] = inventory;
+  } else if (newStock) {
+    newStock[store] = { [model]: inventory };
+  }
+
+  return newStock;
+};
+
+const updateHighStock = (
+  { store, model, inventory }: StockEntryType,
+  currentStock: StockType
+): StockType => {
+  const newStock = { ...currentStock };
+  const noLongerHigh = newStock?.[store]?.[model] && inventory <= 80;
+  const toExistingStore = newStock?.[store] && inventory > 80;
+  const toNewStore = inventory > 80;
+
+  if (noLongerHigh) {
+    delete newStock[store][model];
+    if (Object.keys(newStock[store]).length === 0) {
+      delete newStock[store];
+    }
+  } else if (toExistingStore) {
+    newStock[store][model] = inventory;
+  } else if (toNewStore) {
+    newStock[store] = { [model]: inventory };
+  }
+
+  return newStock;
+};
+
+const updateLowStock = (
+  { store, model, inventory }: StockEntryType,
+  currentStock: StockType
+): StockType => {
+  const newStock = { ...currentStock };
+  const noLongerLow = newStock?.[store]?.[model] && inventory >= 20;
+  const toExistingStore = newStock?.[store] && inventory < 20;
+  const toNewStore = inventory < 20;
+
+  if (noLongerLow) {
+    delete newStock[store][model];
+    if (Object.keys(newStock[store]).length === 0) {
+      delete newStock[store];
+    }
+  } else if (toExistingStore) {
+    newStock[store][model] = inventory;
+  } else if (toNewStore) {
+    newStock[store] = { [model]: inventory };
+  }
+
+  return newStock;
+};
+
+const getStoreCount = (stores: StockType): number => {
+  return stores ? Object.keys(stores).length : 0;
+};
+
+const getProductCount = (stores: StockType): number => {
+  let count = 0;
+
+  if (stores) {
+    Object.keys(stores).forEach((key) => {
+      count += Object.keys(stores[key]).length;
+    });
+  }
+
+  return count;
+};
+
 const App: React.FC = () => {
-  const [stock, setStock] = useState<StockType | undefined>();
-  const [highStock, setHighStock] = useState<StockType | undefined>();
-  const [lowStock, setLowStock] = useState<StockType | undefined>();
-  const [contrastTabSelected, setContrastTabSelected] =
-    useState<boolean>(false);
-
-  const updateStock = (
-    { store, model, inventory }: StockEntryType,
-    currentStock: StockType
-  ): StockType => {
-    const newStock = { ...currentStock };
-
-    if (newStock?.[store]) {
-      newStock[store][model] = inventory;
-    } else if (newStock) {
-      newStock[store] = { [model]: inventory };
-    }
-
-    return newStock;
-  };
-
-  const updateHighStock = (
-    { store, model, inventory }: StockEntryType,
-    currentStock: StockType
-  ): StockType => {
-    const newStock = { ...currentStock };
-
-    if (newStock?.[store]?.[model] && inventory <= 80) {
-      delete newStock[store][model];
-      if (Object.keys(newStock[store]).length === 0) {
-        console.log("REMOVED High", store, model);
-        delete newStock[store];
-        // console.log("FOUND YAAA" + newStock[store]);
-      }
-    } else if (newStock?.[store] && inventory > 80) {
-      newStock[store][model] = inventory;
-    } else if (inventory > 80) {
-      newStock[store] = { [model]: inventory };
-    }
-
-    return newStock;
-  };
-
-  const updateLowStock = (
-    { store, model, inventory }: StockEntryType,
-    currentStock: StockType
-  ): StockType => {
-    const newStock = { ...currentStock };
-
-    if (newStock?.[store]?.[model] && inventory >= 20) {
-      delete newStock[store][model];
-      if (Object.keys(newStock[store]).length === 0) {
-        console.log("REMOVED Low", store, model);
-        delete newStock[store];
-        // console.log("FOUND YAAA" + newStock[store]);
-      }
-    } else if (newStock?.[store] && inventory < 20) {
-      newStock[store][model] = inventory;
-    } else if (inventory < 20) {
-      newStock[store] = { [model]: inventory };
-    }
-
-    return newStock;
-  };
+  const [stock, setStock] = useState<StockType>();
+  const [highStock, setHighStock] = useState<StockType>();
+  const [lowStock, setLowStock] = useState<StockType>();
+  const [highStockCount, setHighStockCount] = useState<number>(0);
+  const [lowStockCount, setLowStockCount] = useState<number>(0);
+  const [highStockStoresCount, setHighStockStoresCount] = useState<number>(0);
+  const [lowStockStoresCount, setLowStockStoresCount] = useState<number>(0);
 
   const updateState = (entry: StockEntryType): void => {
     setStock((prevState) => updateStock(entry, prevState));
@@ -115,24 +138,38 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log(highStock);
-  //   console.log(lowStock);
-  // }, [highStock, lowStock]);
+  useEffect(() => {
+    setHighStockStoresCount(getStoreCount(highStock));
+    setLowStockStoresCount(getStoreCount(lowStock));
+    setHighStockCount(getProductCount(highStock));
+    setLowStockCount(getProductCount(lowStock));
+  }, [highStock, lowStock]);
+
+  const statsItems = [
+    { name: "High Stock Stores", count: highStockStoresCount },
+    { name: "High Stock Products", count: highStockCount },
+    { name: "Low Stock Stores", count: lowStockStoresCount },
+    { name: "Low Stock Products", count: lowStockCount },
+  ];
 
   return (
-    <>
+    <Router>
       <Nav />
       <Main>
-        {!contrastTabSelected && <List items={stock} />}
-        {contrastTabSelected && (
-          <Double>
-            <List items={lowStock} />
-            <List items={highStock} />
-          </Double>
-        )}
+        <Stats items={statsItems} />
+        <Switch>
+          <Route exact path="/">
+            <List items={stock} />
+          </Route>
+          <Route path="/low-high">
+            <Double>
+              <List items={lowStock} />
+              <List items={highStock} />
+            </Double>
+          </Route>
+        </Switch>
       </Main>
-    </>
+    </Router>
   );
 };
 

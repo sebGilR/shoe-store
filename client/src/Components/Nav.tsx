@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import styled, { css } from "styled-components";
 import SectionBase from "./Utils";
 
@@ -102,7 +103,10 @@ const Nav: React.FC = () => {
       </a>
       <Navigation>
         <NavItem>
-          <a href="/">Inventory</a>
+          <Link to="/">Inventory</Link>
+        </NavItem>
+        <NavItem>
+          <Link to="/low-high">Low/High Stock View</Link>
         </NavItem>
       </Navigation>
     </NavBar>
