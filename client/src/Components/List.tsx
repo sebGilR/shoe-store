@@ -51,6 +51,12 @@ const Cell = styled.div<CellProps>`
         color: black;
       `;
     }
+    if (pill === "High stock") {
+      return css`
+        background-color: #a5d497;
+        color: black;
+      `;
+    }
 
     return null;
   }};
@@ -69,7 +75,7 @@ const List = ({ items }: ListProps): JSX.Element => {
     if (inventory === 0) return "Out of stock";
     if (inventory < 10) return "Very low";
     if (inventory < 20) return "Low";
-    if (inventory > 80) return "Almost full";
+    if (inventory > 80) return "High stock";
 
     return "Normal";
   };
