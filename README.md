@@ -4,7 +4,7 @@
 My main goal with this solution is to present not just something that works but also properly formatted and legible code, as well as a solution that could easily be extended 
 to have more features.
 
-I decided to use React to build the interface as it allows me to focus on code readability and gives me a faster development experience, which allowed me to add a couple of non-required features that make the interface more useful.
+I decided to use React to build the interface as it allows me to focus on code readability and gives me a faster development experience, which gave me the chance to add a couple of non-required features that make the interface more useful.
 
 ### Demo
 
@@ -25,7 +25,7 @@ As a user I can:
 - The data currently used for the stats could be used to generate an inventory transfer suggestions system.
 - Add sorting and filtering functionality for easier browsing and comparison. The data structure currently is only good for optimizing update speeds, but might require changes for sorting.
 - The stats could be more accurate, currently the low stock stat shows stock across some stores, but the same shoes might be part of the high stock stats for other stores.
-- Styling coud be improved to be better suited the site's purpose, and to fit more information easily.
+- Styling could be improved to be better suited the site's purpose, and to fit more information easily.
 
 ### Bugs found
 
